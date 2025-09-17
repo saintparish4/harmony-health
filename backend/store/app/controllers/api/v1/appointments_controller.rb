@@ -61,6 +61,21 @@ class Api::V1::AppointmentsController < Api::V1::BaseController
         end
     end
 
+    # New endpoint for smart scheduling
+    def search_optimal
+        result = SmartSchedulingService.new(
+            current_patient,
+            search_filters,
+            search_preferences
+        ).find_optimal_appointments
+
+        render json: {
+            appointments: result,
+            total: result.count,
+            search_id: SecureRandom.uuid # For tracking user searches
+        }
+    end
+
     private
 
     def set_appointment
@@ -90,6 +105,21 @@ class Api::V1::AppointmentsController < Api::V1::BaseController
         appointments = appointments.where('scheduled_at >= ?', Date.parse(params[:start_date])) if params[:start_date].present?
         appointments = appointments.where('scheduled_at <= ?', Date.parse(params[:end_date])) if params[:end_date].present?
         appointments 
+    end
+
+    def search_filters
+        params.permit(
+            :specialty, :max_distance, :min_rating, :date_range,
+            location: [:lat, :lng]
+        ).to_h.with_indifferent_access
+    end
+
+    def search_preferences
+        params.permit(
+            preferred_times: [],
+            provider_gender: nil,
+            language: nil
+        ).to_h.with_indifferent_access
     end
 end
 

@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
 
   # HIPAA Compliance: Log all access
   after_action :log_user_activity
+  around_action :log_phi_access
 
   protected
 
@@ -41,5 +42,45 @@ class ApplicationController < ActionController::Base
       user_agent: request.user_agent,
       timestamp: Time.current
     }.to_json)
+  end
+
+  def log_phi_access
+    yield
+  ensure
+    if current_user && involves_phi?
+      AuditService.log_access(
+        current_user,
+        detected_resource,
+        "#{controller_name}##{action_name}",
+        {
+          ip_address: request.remote_ip,
+          user_agent: request.user_agent,
+          data: sanitized_params
+        }
+      )
+    end
+  end
+
+  def involves_phi?
+    # Determine if the current action involves PHI
+    phi_controllers = %w[patients appointments providers]
+    phi_controllers.include?(controller_name)
+  end
+
+  def detected_resource
+    # Try to detect the main resource being accessed
+    if params[:id].present?
+      controller_name.classify.constantize.find_by(id: params[:id])
+    else
+      controller_name.classify.constantize
+    end
+  rescue
+    OpenStruct.new(class: controller_name.classify, id: params[:id])
+  end
+
+  def sanitized_params
+    # Remove sensitive parameters from logs
+    params.except(:password, :password_confirmation, :medical_history, :notes)
+          .to_unsafe_h
   end
 end

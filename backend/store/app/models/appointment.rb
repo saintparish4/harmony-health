@@ -20,6 +20,8 @@ class Appointment < ApplicationRecord
     before_create :generate_confirmation_number
     before_create :calculate_end_time
     after_save :notify_stakeholders, if: :saved_change_to_status?
+    after_update :broadcast_update
+    after_create :broadcast_creation
   
     # State machine
     aasm column: :status do
@@ -156,5 +158,39 @@ class Appointment < ApplicationRecord
         PatientNotificationJob.perform_later(patient_id, 'appointment_cancelled', id)
         ProviderNotificationJob.perform_later(provider_id, 'appointment_cancelled', id)
       end
+    end
+
+    def broadcast_update
+      # Notify patient
+      AppointmentsChannel.broadcast_to(
+        patient,
+        {
+          type: 'appointment_updated',
+          appointment: AppointmentSerializer.new(self).serializable_hash
+        }
+      )
+
+      # Notify provider
+      AppointmentsChannel.broadcast_to(
+        provider,
+        {
+          type: 'appointment_updated', 
+          appointment: AppointmentSerializer.new(self).serializable_hash
+        }
+      )
+
+      # Broadcast availability change
+      AvailabilityChannel.broadcast_to(
+        provider,
+        {
+          type: 'availability_changed',
+          date: scheduled_at.to_date.iso8601
+        }
+      )
+    end
+
+    def broadcast_creation
+      # Similar to broadcast_update but for new appointments
+      broadcast_update
     end
   end
