@@ -4,8 +4,8 @@ source "https://rubygems.org"
 gem "rails", "~> 8.0.2", ">= 8.0.2.1"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
-# Use sqlite3 as the database for Active Record
-gem "sqlite3", ">= 2.1"
+# Use PostgreSQL as the database for Active Record (required for PostGIS)
+gem "pg", "~> 1.5"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
@@ -17,8 +17,42 @@ gem "stimulus-rails"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
 gem "jbuilder"
 
+# Authentication and authorization
+gem "devise", "~> 4.9"
+gem "cancancan", "~> 3.5"
+
+# State machine for appointments
+gem "aasm", "~> 5.4"
+
+# Audit logging for HIPAA compliance
+gem "paper_trail", "~> 15.0"
+
+# Geocoding for addresses
+gem "geocoder", "~> 1.8"
+
+# Phone number validation
+gem "phonelib", "~> 0.10"
+
+# API serialization
+gem "jsonapi-serializer", "~> 2.2"
+
+# Pagination
+gem "kaminari", "~> 1.2"
+
+# Background job processing
+gem "sidekiq", "~> 7.2"
+
+# Redis for caching and background jobs
+gem "redis", "~> 5.0"
+
+# Environment variables
+gem "dotenv-rails", "~> 2.8"
+
+# CORS handling for API
+gem "rack-cors", "~> 2.0"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -49,6 +83,11 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Testing framework
+  gem "rspec-rails", "~> 6.0"
+  gem "factory_bot_rails", "~> 6.4"
+  gem "faker", "~> 3.2"
 end
 
 group :development do
