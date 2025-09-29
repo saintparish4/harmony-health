@@ -1,0 +1,50 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  # Use PostGIS for geocoding features
+  schema_search_path: public, postgis 
+
+development:
+  <<: *default
+  database: harmony_health_development
+  username: <%= ENV.fetch("DATABASE_USERNAME") { "postgres" } %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD") { "" } %>
+  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
+  port: <%= ENV.fetch("DATABASE_PORT") { 5432 } %>
+
+test:
+  <<: *default
+  database: harmony_health_test
+  username: <%= ENV.fetch("DATABASE_USERNAME") { "postgres" } %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD") { "" } %>
+  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
+  port: <%= ENV.fetch("DATABASE_PORT") { 5432 } %>
+
+staging: 
+  <<: *default
+  database: harmony_health_staging
+  username: <%= ENV.fetch("DATABASE_USERNAME") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD") %>
+  host: <%= ENV.fetch("DATABASE_HOST") %>
+  port: <%= ENV.fetch("DATABASE_PORT") { 5432 } %>
+  # Enable connection pooling for staging
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 10 } %>
+
+production:
+  <<: *default
+  database: harmony_health_production
+  username: <%= ENV.fetch("DATABASE_USERNAME") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD") %>
+  host: <%= ENV.fetch("DATABASE_HOST") %>
+  port: <%= ENV.fetch("DATABASE_PORT") { 5432 } %>
+  # Production optimizations
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 15 } %>
+  prepared_statements: true
+  # Use read replicas for scalability
+  replica:
+    username: <%= ENV["DATABASE_REPLICA_USERNAME"] %>
+    password: <%= ENV["DATABASE_REPLICA_PASSWORD"] %>
+    host: <%= ENV["DATABASE_REPLICA_HOST"] %>
+    port: <%= ENV["DATABASE_REPLICA_PORT"] { 5432 } %>

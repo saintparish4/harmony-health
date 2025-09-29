@@ -1,0 +1,18 @@
+development:
+  adapter: redis
+  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/2" } %>
+  channel_prefix: harmony_health_development
+
+test:
+  adapter: test
+
+staging:
+  adapter: redis
+  url: <%= ENV["REDIS_URL"] %>
+  channel_prefix: harmony_health_staging
+
+production:
+  adapter: redis
+  url: <%= ENV["REDIS_URL"] %>
+  channel_prefix: harmony_health_production
+  # ActionCable uses separate Redis database for WebSocket connections 

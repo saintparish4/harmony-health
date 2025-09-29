@@ -1,0 +1,26 @@
+default: &default
+  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/0" } %>
+  timeout: 1
+  reconnect_attempts: 3
+
+development:
+  <<: *default
+  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/0" } %>
+
+test:
+  <<: *default
+  url: <%= ENV.fetch("REDIS_URL") { "redis://localhost:6379/1" } %>
+
+staging:
+  <<: *default
+  url: <%= ENV["REDIS_URL"] %>
+  timeout: 3
+
+production:
+  <<: *default
+  url: <%= ENV["REDIS_URL"] %>
+  timeout: 5
+  # Production Redis configuration
+  driver: :hiredis
+  network_timeout: 5
+  connect_timeout: 5 
