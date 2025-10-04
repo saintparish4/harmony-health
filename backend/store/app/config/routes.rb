@@ -24,6 +24,12 @@ Rails.application.routes.draw do
 
             resources :patients, only: [:show, :update]
             resources :appointment_types, only: [:index, :show]
+            
+            resources :waitlists, only: [:index, :create, :destroy] do
+                member do
+                    patch :claim
+                end
+            end
         end
     end
 
